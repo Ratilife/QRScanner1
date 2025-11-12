@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QR Scanner</string>
+    
+    <!-- Main Activity -->
+    <string name="read">Прочитать</string>
+    <string name="inventory">Инвентаризация</string>
+    <string name="send">Отправить</string>
+    
+    <!-- Scan Activity -->
+    <string name="scanning_qr">Сканирование QR</string>
+    <string name="normal_mode">Обычный режим</string>
+    <string name="batch_mode">Пакетный</string>
+    <string name="flashlight">Фонарик</string>
+    <string name="camera_switch">Камера</string>
+    <string name="back">Назад</string>
+    <string name="scanned_codes_list">Список кодов</string>
+    <string name="zoom">Зум</string>
+    
+    <!-- List Scanned Activity -->
+    <string name="scanned_qr_codes">Отсканированные QR-коды</string>
+    <string name="delete">Удалить</string>
+    <string name="rescan">Повтор</string>
+    <string name="qr_code">QR-код: %1$s</string>
+    <string name="no_codes_scanned">Нет отсканированных кодов</string>
+    
+    <!-- Inventory Activity -->
+    <string name="inventory_title">Инвентаризация</string>
+    <string name="based_on_json">На основе JSON</string>
+    <string name="create_manually">Создать вручную</string>
+    <string name="approved_format">Утвержденный формат</string>
+    
+    <!-- Send Activity -->
+    <string name="send_title">Отправить</string>
+    <string name="excel">Excel</string>
+    <string name="one_c">1С</string>
+    
+    <!-- Messages -->
+    <string name="camera_permission_required">Требуется разрешение на использование камеры</string>
+    <string name="storage_permission_required">Требуется разрешение на доступ к хранилищу</string>
+    <string name="file_exported_successfully">Файл успешно экспортирован</string>
+    <string name="error_exporting_file">Ошибка при экспорте файла</string>
+    <string name="scan_successful">QR-код успешно отсканирован</string>
+    <string name="scan_failed">Не удалось отсканировать QR-код</string>
+</resources>
+
+
