@@ -29,3 +29,4 @@ public abstract class QRCodeDatabase extends RoomDatabase {
 }
 
 
+

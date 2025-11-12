@@ -69,3 +69,4 @@ public class ScannedCodesAdapter extends RecyclerView.Adapter<ScannedCodesAdapte
 }
 
 
+

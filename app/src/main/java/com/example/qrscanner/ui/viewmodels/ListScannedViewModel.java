@@ -44,3 +44,4 @@ public class ListScannedViewModel extends AndroidViewModel {
 }
 
 
+

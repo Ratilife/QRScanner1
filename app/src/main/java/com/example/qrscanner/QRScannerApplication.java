@@ -14,3 +14,4 @@ public class QRScannerApplication extends Application {
 }
 
 
+

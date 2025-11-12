@@ -16,3 +16,4 @@ rootProject.name = "QRScanner"
 include ':app'
 
 
+
