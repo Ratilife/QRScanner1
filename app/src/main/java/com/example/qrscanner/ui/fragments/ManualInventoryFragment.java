@@ -69,3 +69,4 @@ public class ManualInventoryFragment extends Fragment {
 
 
 
+
