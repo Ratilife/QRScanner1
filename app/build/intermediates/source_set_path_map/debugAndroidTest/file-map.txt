@@ -1,4 +1,0 @@
-com.example.qrscanner.test.app-androidTest-0 F:\CURSOR\QRScanner1\app\build\generated\res\resValues\androidTest\debug
-com.example.qrscanner.test.app-mergeDebugAndroidTestResources-1 F:\CURSOR\QRScanner1\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
-com.example.qrscanner.test.app-mergeDebugAndroidTestResources-2 F:\CURSOR\QRScanner1\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
-com.example.qrscanner.test.app-merged_res-3 F:\CURSOR\QRScanner1\app\build\intermediates\merged_res\debugAndroidTest
