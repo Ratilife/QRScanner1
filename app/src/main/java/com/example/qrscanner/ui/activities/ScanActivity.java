@@ -22,7 +22,7 @@ import com.example.qrscanner.utils.DebugLogger;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
-
+// TODO -  в ScanActivity ошибочные сценарии не логируются вообще.  Отказ в разрешении камеры (строка 160) и недоступный фонарик (строка 71) показывают только Toast — пользователь увидел и забыл, а в Logcat пусто
 public class ScanActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST = 100;
     private static final String TAG = "ScanActivity";
@@ -60,7 +60,7 @@ public class ScanActivity extends AppCompatActivity {
 
         btnListCodes.setOnClickListener(v -> {
             Intent intent = new Intent(ScanActivity.this, ListScannedActivity.class);
-            startActivity(intent);
+            startActivity(intent);  // Отправили
         });
 
         btnFlashlight.setOnClickListener(v -> {
