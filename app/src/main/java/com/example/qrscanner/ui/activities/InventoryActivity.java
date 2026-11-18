@@ -1,4 +1,4 @@
-package com.example.qrscanner.ui.activities;
+package com.example.qrscanner.ui.activities;  // должна быть именно такой
 
 import android.content.Intent;
 import android.os.Bundle;
