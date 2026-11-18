@@ -24,6 +24,7 @@ import com.example.qrscanner.ui.viewmodels.MainViewModel;
  */
 
 public class MainActivity extends AppCompatActivity {
+    // TODO - viewModel - Мертвый код
     // ViewModel переживает пересоздание активности (например, поворот экрана).
     private MainViewModel viewModel;
     // Ссылки на три кнопки главного меню.
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         // Шаг 2: получаем ViewModel, привязанную к этой активности.
         // ViewModelProvider создаёт её один раз и переиспользует
         // при пересоздании активности.
+        //TODO - формирование переменной viewModel это мертвый код
         viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(MainViewModel.class);
         // Шаг 3: находим три кнопки в разметке по их id.
         btnRead = findViewById(R.id.btnRead);               // «ПРОЧИТАТЬ»
@@ -105,10 +107,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
         // «ИНВЕНТАРИЗАЦИЯ» → переход к InventoryActivity.
-        // ⚠ ДЕФЕКТ: InventoryActivity отсутствует в манифесте (судя по логу),
-        // поэтому при нажатии система бросит ActivityNotFoundException —
-        // приложение крашнется на шаге 1 таблицы перехода
-        // (сразу после срабатывания слушателя, ещё до onCreate новой активности).
         btnInventory.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, InventoryActivity.class);
             startActivity(intent);
