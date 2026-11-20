@@ -17,12 +17,12 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.qrscanner.R;
 import com.example.qrscanner.models.QRCode;
 import com.example.qrscanner.ui.viewmodels.ScanViewModel;
-import com.example.qrscanner.utils.CameraHelper;
+
 import com.example.qrscanner.utils.DebugLogger;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
-// TODO -  в ScanActivity ошибочные сценарии не логируются вообще.  Отказ в разрешении камеры (строка 160) и недоступный фонарик (строка 71) показывают только Toast — пользователь увидел и забыл, а в Logcat пусто
+
 
 /**
  * ScanActivity — экран сканера QR-кодов (второй экран приложения).
@@ -63,8 +63,11 @@ public class ScanActivity extends AppCompatActivity {
     // Кнопки экрана сканера.
     private Button btnBack, btnListCodes, btnFlashlight, btnCameraSwitch;
     private Button btnNormalMode, btnBatchMode;
-    // Хелпер для работы с фонариком камеры.
-    private CameraHelper cameraHelper;
+
+    // Состояние фонарика: false — выключен, true — включён.
+    // Храним сами, т.к. у barcodeView нет метода «фонарик включён?».
+    private boolean isFlashOn = false;
+
     // Текущий режим: false — одиночное сканирование,
     // true — пакетный режим (сканируем много кодов подряд).
     private boolean isBatchMode = false;
@@ -88,17 +91,16 @@ public class ScanActivity extends AppCompatActivity {
         // Шаг 2: получаем ViewModel сканера. При повороте экрана
         // ViewModelProvider вернёт ТУ ЖЕ ViewModel (данные не потеряются).
         viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(ScanViewModel.class);
-        // Шаг 3: создаём CameraHelper для управления фонариком.
-        cameraHelper = new CameraHelper(this);
-        // Шаг 4: находим View, вешаем слушатели, запускаем decodeContinuous.
+
+        // Шаг 3: находим View, вешаем слушатели, запускаем decodeContinuous.
         // ВАЖНО: слушатели только ПОВЕШЕНЫ — код внутри лямбд
         // выполнится по нажатию, а не сейчас.
         initViews();
-        // Шаг 5: подписываемся на LiveData ViewModel (отсканированный код,
+        // Шаг 4: подписываемся на LiveData ViewModel (отсканированный код,
         // ошибки). Observer сработает, когда ViewModel опубликует данные.
         setupObservers();
-        // Шаг 6: проверяем разрешение камеры.
-        //   - разрешение есть → startScanning() → barcodeView.resume()
+        // Шаг 5: проверяем разрешение камеры.
+        //   - разрешение есть → ничего не делаем, камеру включит onResume()
         //   - разрешения нет → показываем системный диалог
         //     «Разрешить доступ к камере?».
         // ВАЖНО: диалог разрешения НЕ закрывает экран полностью —
@@ -136,14 +138,19 @@ public class ScanActivity extends AppCompatActivity {
             startActivity(intent);  // Отправили
         });
 
-        // «ФОНАРИК» → включаем/выключаем вспышку.
+        // «ФОНАРИК» → включаем/выключаем вспышку через barcodeView —
+        // он владелец камеры, конфликта за ресурс нет.
         btnFlashlight.setOnClickListener(v -> {
-            if (cameraHelper.hasFlash(this)) {
-                cameraHelper.toggleFlash(this);
-                btnFlashlight.setText(cameraHelper.isFlashOn() ? "Выкл. фонарик" : "Вкл. фонарик");
+            if (hasFlash()) {
+                isFlashOn = !isFlashOn;
+                if (isFlashOn) {
+                    barcodeView.setTorchOn();
+                } else {
+                    barcodeView.setTorchOff();
+                }
+                btnFlashlight.setText(isFlashOn ? "Выкл. фонарик" : "Вкл. фонарик");
             } else {
-                // TODO: здесь только Toast — в Logcat ничего не пишется.
-                //  Ошибочный сценарий «фонарик недоступен» не логируется.
+                DebugLogger.w(TAG, "Фонарик недоступен на этом устройстве");
                 Toast.makeText(this, "Фонарик недоступен", Toast.LENGTH_SHORT).show();
             }
         });
@@ -234,6 +241,15 @@ public class ScanActivity extends AppCompatActivity {
         DebugLogger.d(TAG, "QR Code scanned: " + qrValue);
         viewModel.onQRCodeScanned(qrValue);
     }
+
+    /**
+     * Проверяет, есть ли на устройстве вспышка.
+     * Переехало из удалённого CameraHelper.
+     */
+    private boolean hasFlash() {
+        return getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+    }
+
     /**
      * Проверка разрешения камеры. Вызывается из onCreate().
      */
@@ -248,9 +264,6 @@ public class ScanActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
                     CAMERA_PERMISSION_REQUEST);
-        } else {
-            // Разрешение уже есть — сразу запускаем сканирование.
-            startScanning();
         }
     }
     /**
@@ -262,30 +275,17 @@ public class ScanActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Пользователь разрешил — запускаем камеру.
+                // Пользователь разрешил.
                 // Далее система вызовет onResume() → barcodeView.resume().
-                startScanning();
             } else {
                 // Пользователь запретил — показываем Toast и закрываем экран.
-                // TODO: здесь только Toast — в Logcat ничего не пишется.
-                //  Ошибочный сценарий «отказ в разрешении» не логируется.
+                DebugLogger.e(TAG, "Отказ в разрешении камеры, ScanActivity закрывается");
                 Toast.makeText(this, "Разрешение на камеру необходимо для сканирования", Toast.LENGTH_LONG).show();
                 finish();  // → onPause() → onStop() → onDestroy()
             }
         }
     }
-    /**
-     * Запускает сканирование: barcodeView.resume() включает камеру.
-     * Вызывается либо из checkCameraPermission() (если разрешение уже есть
-     * при создании), либо из onRequestPermissionsResult() (после разрешения).
-     *
-     * ВНИМАНИЕ: здесь возможен двойной вызов resume() —
-     * и отсюда, и из onResume(). Это избыточно, но библиотека обычно
-     * справляется с повторным resume().
-     */
-    private void startScanning() {
-        barcodeView.resume();
-    }
+
     /**
      * onResume() — активность на переднем плане, принимает нажатия.
      * Здесь включаем камеру (ресурс), если разрешение есть.
@@ -324,21 +324,6 @@ public class ScanActivity extends AppCompatActivity {
         super.onPause();
         barcodeView.pause();
     }
-    /**
-     * onDestroy() — активность уничтожается.
-     * Вызывается после finish() (кнопка «НАЗАД» или отказ в разрешении)
-     * или когда система убивает активность ради памяти.
-     *
-     * ВАЖНО: onDestroy() может НЕ вызваться, если система убила процесс —
-     * поэтому освобождать критические ресурсы нужно в onPause().
-     * Здесь освобождаем CameraHelper (фонарик).
-     */
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (cameraHelper != null) {
-            cameraHelper.release();
-        }
-    }
+
 }
 
